@@ -764,6 +764,31 @@ void DocumentPrivate::loadViewsInfo( View *view, const QDomElement &e )
                 view->setCapability( View::ZoomModality, newmode );
             }
         }
+        else if ( viewElement.tagName() == "viewMode" )
+        {
+          const QString modeString = viewElement.attribute( "mode" );
+          bool newmode_ok = true;
+          const int newmode = !modeString.isEmpty() ? modeString.toInt( &newmode_ok ) : 2;
+          if ( newmode_ok 
+              && view->supportsCapability( View::ViewModeModality )
+              && ( view->capabilityFlags( View::ViewModeModality ) & ( View::CapabilityRead | View::CapabilitySerializable ) ) )
+          {
+             view->setCapability( View::ViewModeModality, newmode );
+          }
+        }
+        else if ( viewElement.tagName() == "continuous" )
+        {
+          const QString modeString = viewElement.attribute( "mode" );
+          bool newmode_ok = true;
+          const int newmode = !modeString.isEmpty() ? modeString.toInt( &newmode_ok ) : 2;
+          if ( newmode_ok
+               && view->supportsCapability( View::Continuous )
+               && ( view->capabilityFlags( View::Continuous ) & ( View::CapabilityRead | View::CapabilitySerializable ) ) )
+          {
+              view->setCapability( View::Continuous, newmode );
+          }
+        }
+
 
         viewNode = viewNode.nextSibling();
     }
@@ -789,6 +814,26 @@ void DocumentPrivate::saveViewsInfo( View *view, QDomElement &e ) const
         {
             zoomEl.setAttribute( "mode", mode );
         }
+    }
+    if ( view->supportsCapability( View::ViewModeModality )
+         && ( view->capabilityFlags( View::ViewModeModality ) & ( View::CapabilityRead | View::CapabilitySerializable ) ) )
+    {
+        QDomElement viewEl = e.ownerDocument().createElement( "viewMode" );
+        e.appendChild( viewEl );
+        bool ok = true;
+        const int mode = view->capability( View::ViewModeModality ).toInt( &ok );
+        if ( ok )
+        {
+            viewEl.setAttribute( "mode", mode );
+        }
+    }
+    if ( view->supportsCapability( View::Continuous )
+         && ( view->capabilityFlags( View::Continuous ) & ( View::CapabilityRead | View::CapabilitySerializable ) ) )
+    {
+        QDomElement contEl = e.ownerDocument().createElement( "continuous" );
+        e.appendChild( contEl );
+        const bool mode = view->capability( View::Continuous ).toBool();
+        contEl.setAttribute( "mode", mode );
     }
 }
 
