@@ -43,9 +43,7 @@ class OKULARCORE_EXPORT View
         enum ViewCapability
         {
             Zoom,                ///< Possibility to get/set the zoom of the view
-            ZoomModality,        ///< Possibility to get/set the zoom mode of the view
-            Continuous,          ///< Possibility to toggle continuous mode
-            ViewModeModality       ///< Possibility to get/set the view mode
+            ZoomModality         ///< Possibility to get/set the zoom mode of the view
         };
 
         /**

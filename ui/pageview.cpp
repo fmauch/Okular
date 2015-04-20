@@ -135,7 +135,6 @@ public:
 
     // view layout (columns and continuous in Settings), zoom and mouse
     PageView::ZoomMode zoomMode;
-    Okular::Settings::EnumViewMode::type viewMode;
     float zoomFactor;
     QPoint mouseGrabPos;
     QPoint mousePressPos;
@@ -1393,8 +1392,6 @@ bool PageView::supportsCapability( ViewCapability capability ) const
     {
         case Zoom:
         case ZoomModality:
-        case Continuous:
-        case ViewModeModality:
             return true;
     }
     return false;
@@ -1406,8 +1403,6 @@ Okular::View::CapabilityFlags PageView::capabilityFlags( ViewCapability capabili
     {
         case Zoom:
         case ZoomModality:
-        case Continuous:
-        case ViewModeModality:
             return CapabilityRead | CapabilityWrite | CapabilitySerializable;
     }
     return 0;
@@ -1421,27 +1416,6 @@ QVariant PageView::capability( ViewCapability capability ) const
             return d->zoomFactor;
         case ZoomModality:
             return d->zoomMode;
-        case Continuous:
-            return d->aViewContinuous->isChecked();
-        case ViewModeModality:
-            int mode = 0;
-            if ( d->viewMode ==  Okular::Settings::EnumViewMode::Single )
-            {
-                mode = 0;
-            }
-            else if ( d->viewMode == Okular::Settings::EnumViewMode::Facing )
-            {
-                mode = 1;
-            }
-            else if ( d->viewMode == Okular::Settings::EnumViewMode::FacingFirstCentered )
-            {
-                mode = 2;
-            }
-            else if ( d->viewMode == Okular::Settings::EnumViewMode::Summary )
-            {
-                mode = 3;
-            }
-            return mode;
     }
     return QVariant();
 }
@@ -1470,24 +1444,6 @@ void PageView::setCapability( ViewCapability capability, const QVariant &option 
                 if ( mode >= 0 && mode < 3 )
                     updateZoom( (ZoomMode)mode );
             }
-            break;
-        }
-        case ViewModeModality:
-        {
-            bool ok = true;
-            int mode = option.toInt( &ok );
-            if ( ok )
-            {
-                if ( mode >= 0 && mode < 4 )
-                    updateViewMode(mode);
-            }
-            break;
-        }
-        case Continuous:
-        {
-            bool mode = option.toBool( );
-            d->aViewContinuous->setChecked(mode);
-            slotContinuousToggled(mode);
             break;
         }
     }
@@ -3894,13 +3850,6 @@ void PageView::updateZoomText()
     d->aZoom->selectableActionGroup()->setEnabled( d->items.size() > 0 );
 }
 
-void PageView::updateViewMode(const int& nr)
-{
-    d->viewMode = static_cast<Okular::Settings::EnumViewMode::type>(nr);
-    d->aViewMode->menu()->actions().at( nr )->trigger();
-}
-
-
 void PageView::updateCursor()
 {
     const QPoint p = contentAreaPosition() + viewport()->mapFromGlobal( QCursor::pos() );
@@ -4726,7 +4675,6 @@ void PageView::slotAutoFitToggled( bool on )
 void PageView::slotViewMode( QAction *action )
 {
     const int nr = action->data().toInt();
-    d->viewMode = static_cast<Okular::Settings::EnumViewMode::type>(nr);
     if ( (int)Okular::Settings::viewMode() != nr )
     {
         Okular::Settings::setViewMode( nr );
