@@ -1,11 +1,12 @@
+cmake_minimum_required(VERSION 2.8.9)
 project(okular)
 
 cmake_minimum_required(VERSION 2.8.12)
 
 set(QT_REQUIRED_VERSION "5.2.0")
-set(KF5_REQUIRED_VERSION "5.8.0")
+set(KF5_REQUIRED_VERSION "5.12.0")
 
-find_package(ECM 1.7.0 CONFIG REQUIRED)
+find_package(ECM 5.12.0 CONFIG REQUIRED)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ECM_MODULE_PATH})
 
 include(ECMInstallIcons)
@@ -23,7 +24,7 @@ include(ECMPackageConfigHelpers)
 
 ecm_setup_version(1.0.0 VARIABLE_PREFIX OKULAR
                         VERSION_HEADER "${CMAKE_CURRENT_BINARY_DIR}/core/version.h"
-                        PACKAGE_VERSION_FILE "${CMAKE_CURRENT_BINARY_DIR}/OkularConfigVersion.cmake")
+                        PACKAGE_VERSION_FILE "${CMAKE_CURRENT_BINARY_DIR}/Okular5ConfigVersion.cmake")
 
 find_package(Qt5 ${QT_REQUIRED_VERSION} CONFIG REQUIRED COMPONENTS Core DBus Test Widgets PrintSupport Svg Qml Quick)
 find_package(Qt5 ${QT_REQUIRED_VERSION} OPTIONAL_COMPONENTS TextToSpeech)
@@ -73,7 +74,7 @@ set_package_properties("LibKScreen" PROPERTIES
 add_definitions(-DQT_USE_FAST_CONCATENATION -DQT_USE_FAST_OPERATOR_PLUS)
 add_definitions(-DTRANSLATION_DOMAIN="okular")
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${PHONON_INCLUDES} core/synctex ${ZLIB_INCLUDE_DIR})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${PHONON_INCLUDES} core/synctex ${ZLIB_INCLUDE_DIR} ${CMAKE_BINARY_DIR}/core)
 
 add_subdirectory( active )
 add_subdirectory( ui )
@@ -94,6 +95,7 @@ endif(NOT WIN32)
 # okularcore
 
 set(okularcore_SRCS
+   core/qpagesize.cpp # REMOVE On Qt5 port
    core/action.cpp
    core/annotations.cpp
    core/area.cpp
@@ -164,7 +166,7 @@ install( FILES
            core/fileprinter.h
            core/observer.h
            ${CMAKE_CURRENT_BINARY_DIR}/core/version.h
-           ${CMAKE_CURRENT_BINARY_DIR}/okularcore_export.h
+           ${CMAKE_CURRENT_BINARY_DIR}/core/okularcore_export.h
            ${CMAKE_CURRENT_BINARY_DIR}/settings_core.h
          DESTINATION ${KDE_INSTALL_INCLUDEDIR}/okular/core COMPONENT Devel)
 
@@ -183,7 +185,7 @@ ki18n_wrap_ui(okularcore_SRCS
 kconfig_add_kcfg_files(okularcore_SRCS conf/settings_core.kcfgc )
 
 add_library(okularcore SHARED ${okularcore_SRCS})
-generate_export_header(okularcore BASE_NAME okularcore)
+generate_export_header(okularcore BASE_NAME okularcore EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/core/okularcore_export.h")
 
 # Special handling for linking okularcore on OSX/Apple
 IF(APPLE)
@@ -216,9 +218,9 @@ if(LibKScreen_FOUND)
     #target_link_libraries(okularcore KF5::LibKScreen)
 endif(LibKScreen_FOUND)
 
-set_target_properties(okularcore PROPERTIES VERSION 6.0.0 SOVERSION 6 )
+set_target_properties(okularcore PROPERTIES VERSION 6.0.0 SOVERSION 6 OUTPUT_NAME Okular5Core EXPORT_NAME Core)
 
-install(TARGETS okularcore EXPORT OkularTargets ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})
+install(TARGETS okularcore EXPORT Okular5Targets ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})
 
 install(FILES conf/okular.kcfg DESTINATION ${KDE_INSTALL_KCFGDIR})
 install(FILES conf/okular_core.kcfg DESTINATION ${KDE_INSTALL_KCFGDIR})
@@ -315,22 +317,22 @@ install( FILES part.rc part-viewermode.rc DESTINATION ${KDE_INSTALL_KXMLGUI5DIR}
 
 ########### cmake files #################
 
-set(CMAKECONFIG_INSTALL_DIR "${KDE_INSTALL_CMAKEPACKAGEDIR}/Okular")
+set(CMAKECONFIG_INSTALL_DIR "${KDE_INSTALL_CMAKEPACKAGEDIR}/Okular5")
 ecm_configure_package_config_file(
-  "${CMAKE_CURRENT_SOURCE_DIR}/OkularConfig.cmake.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/OkularConfig.cmake"
+  "${CMAKE_CURRENT_SOURCE_DIR}/Okular5Config.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/Okular5Config.cmake"
   INSTALL_DESTINATION  ${CMAKECONFIG_INSTALL_DIR}
   PATH_VARS  INCLUDE_INSTALL_DIR CMAKE_INSTALL_PREFIX
 )
 
 install(FILES
-  "${CMAKE_CURRENT_BINARY_DIR}/OkularConfig.cmake"
-  "${CMAKE_CURRENT_BINARY_DIR}/OkularConfigVersion.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/Okular5Config.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/Okular5ConfigVersion.cmake"
   DESTINATION "${CMAKECONFIG_INSTALL_DIR}"
   COMPONENT Devel
 )
 
-install(EXPORT OkularTargets DESTINATION "${CMAKECONFIG_INSTALL_DIR}" FILE OkularTargets.cmake NAMESPACE Okular:: )
+install(EXPORT Okular5Targets DESTINATION "${CMAKECONFIG_INSTALL_DIR}" FILE Okular5Targets.cmake NAMESPACE Okular::)
 
 ########### summary #################
 

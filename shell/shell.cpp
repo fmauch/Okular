@@ -45,9 +45,7 @@
 #include <KUrlMimeData>
 #include <KLocalizedString>
 #include <KSharedConfig>
-#ifdef KActivities_FOUND
 #include <KActivities/ResourceInstance>
-#endif
 
 // local includes
 #include "kdocumentviewer.h"
@@ -62,9 +60,7 @@ static const char* const SESSION_TAB_KEY = "ActiveTab";
 
 Shell::Shell( const QString &serializedOptions )
   : KParts::MainWindow(), m_menuBarWasShown(true), m_toolBarWasShown(true)
-#ifdef KActivities_FOUND
     , m_activityResource(0)
-#endif
     , m_isValid(true)
 {
   setObjectName( QLatin1String( "okular::Shell#" ) );
@@ -130,7 +126,7 @@ Shell::Shell( const QString &serializedOptions )
     {
         setAttribute(Qt::WA_ShowWithoutActivating);
     }
-    
+
     QDBusConnection::sessionBus().registerObject("/okularshell", this, QDBusConnection::ExportScriptableSlots);
   }
   else
@@ -242,12 +238,10 @@ void Shell::openUrl( const QUrl & url, const QString &serializedOptions )
             {
                 if ( openOk )
                 {
-#ifdef KActivities_FOUND
                     if ( !m_activityResource )
                         m_activityResource = new KActivities::ResourceInstance( window()->winId(), this );
 
                     m_activityResource->setUri( url );
-#endif
                     m_recent->addUrl( url );
                 }
                 else
@@ -270,7 +264,7 @@ void Shell::readSettings()
     const KConfigGroup group = KSharedConfig::openConfig()->group( "Desktop Entry" );
     bool fullScreen = group.readEntry( "FullScreen", false );
     setFullScreen( fullScreen );
-    
+
     if (fullScreen)
     {
         m_menuBarWasShown = group.readEntry( shouldShowMenuBarComingFromFullScreen, true );
@@ -325,6 +319,9 @@ void Shell::setupActions()
 
 void Shell::saveProperties(KConfigGroup &group)
 {
+    if ( !m_isValid ) // part couldn't be loaded, nothing to save
+        return;
+
     // Gather lists of settings to preserve
     QStringList urls;
     for( int i = 0; i < m_tabs.size(); ++i )
@@ -444,11 +441,11 @@ void Shell::slotUpdateFullScreen()
     {
       m_menuBarWasShown = !menuBar()->isHidden();
       menuBar()->hide();
-      
+
       m_toolBarWasShown = !toolBar()->isHidden();
       toolBar()->hide();
 
-      KToggleFullScreenAction::setFullScreen(this, true);      
+      KToggleFullScreenAction::setFullScreen(this, true);
     }
     else
     {
@@ -460,7 +457,7 @@ void Shell::slotUpdateFullScreen()
       {
         toolBar()->show();
       }
-      KToggleFullScreenAction::setFullScreen(this, false);      
+      KToggleFullScreenAction::setFullScreen(this, false);
     }
 }
 

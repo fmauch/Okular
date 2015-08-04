@@ -30,6 +30,7 @@ class MagnifierView : public QWidget, public Okular::DocumentObserver
 
   public:
     MagnifierView( Okular::Document *document, QWidget *parent = 0 );
+    ~MagnifierView();
 
     void notifySetup( const QVector< Okular::Page * > & pages, int setupFlags );
     void notifyPageChanged( int page, int flags );
@@ -40,7 +41,7 @@ class MagnifierView : public QWidget, public Okular::DocumentObserver
     void move( int x, int y );
 
   protected:
-    void paintEvent( QPaintEvent *e );
+    void paintEvent( QPaintEvent *e ) Q_DECL_OVERRIDE;
 
   private:
     Okular::NormalizedRect normalizedView() const;

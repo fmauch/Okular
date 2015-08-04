@@ -181,7 +181,7 @@ static QString compressedMimeFor( const QString& mime_to_check )
     const QString app_xz( QString::fromLatin1( "application/x-xz" ) );
     if ( compressedMimeMap.isEmpty() )
     {
-        std::auto_ptr< KFilterBase > f;
+        std::unique_ptr< KFilterBase > f;
         compressedMimeMap[ QString::fromLatin1( "image/x-gzeps" ) ] = app_gzip;
         // check we can read bzip2-compressed files
         f.reset( KCompressionDevice::filterForCompressionType( KCompressionDevice::BZip2 ) );
@@ -224,8 +224,8 @@ static Okular::EmbedMode detectEmbedMode( QWidget *parentWidget, QObject *parent
     Q_UNUSED( parentWidget );
 
     if ( parent
-         && ( parent->objectName() == QLatin1String( "okular::Shell" )
-              || parent->objectName() == QLatin1String( "okular/okular__Shell" ) ) )
+         && ( parent->objectName().startsWith( QLatin1String( "okular::Shell" ) )
+              || parent->objectName().startsWith( QLatin1String( "okular/okular__Shell" ) ) ) )
         return Okular::NativeShellMode;
 
     if ( parent
@@ -571,7 +571,7 @@ void Part::setupViewerActions()
     m_prevPage->setIconText( i18nc( "Previous page", "Previous" ) );
     m_prevPage->setToolTip( i18n( "Go back to the Previous Page" ) );
     m_prevPage->setWhatsThis( i18n( "Moves to the previous page of the document" ) );
-    ac->setDefaultShortcuts(m_prevPage, KStandardShortcut::prior());
+    ac->setDefaultShortcut(m_prevPage, QKeySequence());
     // dirty way to activate prev page when pressing miniBar's button
     connect( m_miniBar, SIGNAL(prevPage()), m_prevPage, SLOT(trigger()) );
     connect( m_pageNumberTool, SIGNAL(prevPage()), m_prevPage, SLOT(trigger()) );
@@ -583,7 +583,7 @@ void Part::setupViewerActions()
     m_nextPage->setIconText( i18nc( "Next page", "Next" ) );
     m_nextPage->setToolTip( i18n( "Advance to the Next Page" ) );
     m_nextPage->setWhatsThis( i18n( "Moves to the next page of the document" ) );
-    ac->setDefaultShortcuts(m_nextPage, KStandardShortcut::next());
+    ac->setDefaultShortcut(m_nextPage, QKeySequence());
     // dirty way to activate next page when pressing miniBar's button
     connect( m_miniBar, SIGNAL(nextPage()), m_nextPage, SLOT(trigger()) );
     connect( m_pageNumberTool, SIGNAL(nextPage()), m_nextPage, SLOT(trigger()) );
