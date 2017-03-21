@@ -10,7 +10,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ECM_MODULE_PATH})
 
 # KDE Application Version, managed by release script
 set (KDE_APPLICATIONS_VERSION_MAJOR "17")
-set (KDE_APPLICATIONS_VERSION_MINOR "03")
+set (KDE_APPLICATIONS_VERSION_MINOR "07")
 set (KDE_APPLICATIONS_VERSION_MICRO "70")
 set (KDE_APPLICATIONS_VERSION "${KDE_APPLICATIONS_VERSION_MAJOR}.${KDE_APPLICATIONS_VERSION_MINOR}.${KDE_APPLICATIONS_VERSION_MICRO}")
 
@@ -27,7 +27,7 @@ include(ECMAddTests)
 include(ECMAddAppIcon)
 include(ECMPackageConfigHelpers)
 
-ecm_setup_version(1.0.${KDE_APPLICATIONS_VERSION_MICRO}
+ecm_setup_version(1.1.${KDE_APPLICATIONS_VERSION_MICRO}
                   VARIABLE_PREFIX OKULAR
                   VERSION_HEADER "${CMAKE_CURRENT_BINARY_DIR}/core/version.h"
                   PACKAGE_VERSION_FILE "${CMAKE_CURRENT_BINARY_DIR}/Okular5ConfigVersion.cmake")
@@ -41,7 +41,6 @@ else()
 endif()
 
 find_package(KF5 ${KF5_REQUIRED_VERSION} REQUIRED COMPONENTS
-    Activities
     Archive
     Bookmarks
     Completion
@@ -58,6 +57,11 @@ find_package(KF5 ${KF5_REQUIRED_VERSION} REQUIRED COMPONENTS
     Wallet
     WindowSystem
 )
+if(NOT WIN32)
+    find_package(KF5 ${KF5_REQUIRED_VERSION} REQUIRED COMPONENTS
+        Activities
+    )
+endif()
 find_package(Phonon4Qt5 CONFIG REQUIRED)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake/modules)
@@ -71,6 +75,12 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${PHONON_INCLUDES} core/synctex 
 
 add_subdirectory( mobile )
 option(BUILD_COVERAGE "Build the project with gcov support" OFF)
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.0.0")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wsuggest-override" )
+    endif()
+endif()
 
 if(BUILD_COVERAGE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
@@ -268,6 +278,7 @@ set(okularpart_SRCS
    ui/pagepainter.cpp
    ui/pagesizelabel.cpp
    ui/pageviewannotator.cpp
+   ui/pageviewmouseannotation.cpp
    ui/pageview.cpp
    ui/magnifierview.cpp
    ui/pageviewutils.cpp
