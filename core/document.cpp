@@ -723,8 +723,7 @@ void DocumentPrivate::loadViewsInfo( View *view, const QDomElement &e )
 }
 
 void DocumentPrivate::saveViewsInfo( View *view, QDomElement &e ) const
-{   
-    qCWarning(OkularCoreDebug).nospace() << "in save";
+{
     if ( view->supportsCapability( View::Zoom )
          && ( view->capabilityFlags( View::Zoom ) & ( View::CapabilityRead | View::CapabilitySerializable ) )
          && view->supportsCapability( View::ZoomModality )
@@ -754,7 +753,7 @@ void DocumentPrivate::saveViewsInfo( View *view, QDomElement &e ) const
         contEl.setAttribute( "mode", mode );
     }
     if ( view->supportsCapability( View::ViewModeModality )
-         && ( view->capabilityFlags( View::ViewModeModality ) 
+         && ( view->capabilityFlags( View::ViewModeModality )
               & ( View::CapabilityRead | View::CapabilitySerializable ) ) )
     {
         QDomElement viewEl = e.ownerDocument().createElement( "viewMode" );
